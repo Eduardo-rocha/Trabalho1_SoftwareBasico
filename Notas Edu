@@ -1,0 +1,31 @@
+Notas Trabalho 1 - Software Básico
+
+Eduardo Moura C. Rocha
+
+
+Projeto do Pré-processador
+
+	Tarefas:
+
+		1) 	
+			Eliminar sensibilidade ao caso.
+			Tudo maiúsculo ou tudo minúsculo.
+		2)	
+			Eliminar espaços, tabulações e quebras de linha desnecessárias.
+			Criar estrutura de dados para armazenar linhas eliminadas.
+				Para detecção de erros.
+		3)	
+			Eliminar comentários.(';')
+		4)	
+			Avaliar as diretivas EQU e IF.
+
+Projeto do processador de macros
+
+	Tarefa: 
+
+		Expandir as macros.
+
+	Observações: 
+
+		1)	
+			Uma macro deve ser capaz de chamar outra macro, mas as macros devem estar na ordem correta no código.

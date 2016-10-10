@@ -1,0 +1,15 @@
+SECTION TEXT
+ROT:INPUT N1
+copy N1, N4 ; comentario qualquer
+COPY N2, N3
+COPY N3, N3+ONE
+OUTPUT N3+1
+HEY: load 4
+STOP
+SECTION DATA
+N1: SPACE 3
+N2: CONST -0x1aBc
+N3: SPACE TWO+TWO
+N4: SPACE ;as dasdas
+N4: load 2
+N5: space
