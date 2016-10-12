@@ -13,9 +13,15 @@
 #include <string>
 #include <algorithm>
 
-
-
 using namespace std;
+
+//
+struct EquateStruct {
+    string nome;
+    string valor;
+    EquateStruct *next;
+} ;
+
 
 int main(int argc, const char * argv[]) {
     
@@ -39,7 +45,7 @@ int main(int argc, const char * argv[]) {
         
         // UpperCase all characters
         transform(line.begin(), line.end(),line.begin(), ::toupper);
-
+        
         for (unsigned i=0; i<line.length(); ++i)
         {
             CaractereAnterior = Caractere;
@@ -52,7 +58,7 @@ int main(int argc, const char * argv[]) {
                 line.at(i) = ' ';
             }
             
-            // detectar comentário ---------------------------------------------------------------------
+            // detectar comentário
             if (Caractere == ';')
             {
                 // cortar linha, retirar comentario
@@ -60,7 +66,7 @@ int main(int argc, const char * argv[]) {
                 break; // sair do for, fim da linha
             }
             
-            // teste de linha vazia --------------------------------------------------------------------
+            // teste de linha vazia
             if (Caractere != ' ' && LinhaVazia)
             {
                 
@@ -70,21 +76,59 @@ int main(int argc, const char * argv[]) {
                 LinhaVazia = false;
             }
             
-            // unificar espaços internos da linha ------------------------------------------------------
+            // unificar espaços internos da linha
             if (!LinhaVazia && CaractereAnterior == ' ' && Caractere == ' ')
             {
                 line.erase (line.begin()+i); // apagar espaço duplo
                 i--;
             }
+            
+            // retirar SPACE antes de ':' e ','
+            if (!LinhaVazia && CaractereAnterior == ' ' && (Caractere == ':' || Caractere == ','))
+            {
+                line.erase (line.begin()+i); // apagar espaço antes
+                line.at(i-1) = Caractere;
+                i--;
+            }
+            
+            // garantir que tem SPACE depois de ':' e ','
+            if (!LinhaVazia && (CaractereAnterior == ':' || CaractereAnterior == ',') && Caractere != ' ')
+            {
+                line.insert (line.begin()+i, ' '); // adicionar espaço
+                line.at(i-1) = CaractereAnterior;
+                i++;
+            }
+            
         }
+        
+        // apagar espaço no final da linha
+        if (!LinhaVazia)
+            if (line.at(line.length()-1) == ' ')
+                line.erase (line.begin()+line.length()-1);
+        
+        // Procurar EQU na linha -----------------------------------------------------------------------
+        size_t foundEQU = line.find("EQU");//foundEQU = unsig int com a posição
+        if (foundEQU!=string::npos)
+        {
+            //Procurar Label
+            
+            //Procurar Valor
+            
+            //Salvar
+        }
+        
+        // Procurar IF na linha ------------------------------------------------------------------------
+        
+        
+        
+        
+        
+        
+        
         
         // Escrever linha no arquivo de saida
         if (!LinhaVazia) // linha não vazia
-        {
-            if (line.at(line.length()-1) == ' ')
-                line.erase (line.begin()+line.length()-1); // apagar espaço no final da linha
             ArquivoPRE << line << "\n";
-        }
     }
     
     
@@ -93,9 +137,9 @@ int main(int argc, const char * argv[]) {
     
     
     
-
+    
     ArquivoPRE.close();
     ArquivoASM.close();
-
+    
     return 0;
 }
