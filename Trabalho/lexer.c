@@ -6,11 +6,11 @@ char *textoDoArquivo(char* arquivo_entrada){
   char *text = (char*) malloc(sizeof(char));
   char c;
   int size = 0;
-  
+
   while( EOF != (c = fgetc(arq))) {
 
+    text[size] = toupper(c);
     text = realloc(text, sizeof(char)*(size+1));
-    text[size] = c;
     size++;
 
   }
@@ -65,40 +65,37 @@ token scanner (char *texto, int *posicaotexto){
   char *conteudoToken = (char*) malloc(sizeof(char));
   conteudoToken[0] = texto[i];
 
-  if ( isalpha(text[i]) ){ 
+  if ( isalpha(texto[i]) ){ 
     
     // Se o primeiro caracter do conteudo e uma letra, provavelmente e WORD
     
-    while( isalpha(text[i+j]) 
-	   || text[i+j]=='_' 
-	   || isdigit(text[i+j])){
+    while( isalpha(texto[i+j]) 
+	   || texto[i+j]=='_' 
+	   || isdigit(texto[i+j])){
 
       conteudoToken = realloc(conteudoToken, (j + 1) * sizeof(char));
-      conteudoToken[j] = text[i+j];
+      conteudoToken[j] = texto[i+j];
       j++;
 
     }
     
     conteudoToken = realloc(conteudoToken, (j + 1) * sizeof(char));
     conteudoToken[j] = '\0';
-    
     tok = construirToken(conteudoToken,WORD);
-  }
-
-  else if (text[i]=='0'){
+  }else if (texto[i]=='0'){
     
     // Se o primeiro caracter for 0, pode ser hexadecimal 0x ou decimal
 
-    if(text[i+j]=='x' || text[i+j]=='X'){
+    if(texto[i+j]=='x' || texto[i+j]=='X'){
 
       // Se o segundo digito for x ou X o número é hexadecimal
 
       j++;
 
-      while(isxdigit(text[i+j])){
+      while(isxdigit(texto[i+j])){
 
         conteudoToken = realloc(conteudoToken, (j-1) * sizeof(char));
-        conteudoToken[j-2] = text[i+j];
+        conteudoToken[j-2] = texto[i+j];
 	j++;
 	
       }
@@ -106,7 +103,7 @@ token scanner (char *texto, int *posicaotexto){
       conteudoToken = realloc(conteudoToken, (j-1) * sizeof(char));
       conteudoToken[j-2] = '\0';
 
-      if (isalpha(text[i+j]) || text[i+j] == '_') { // Verifica se tinha continuacao errada do hex
+      if (isalpha(texto[i+j]) || texto[i+j] == '_') { // Verifica se tinha continuacao errada do hex
         tok = construirToken(conteudoToken, ERRONUM);
       } else {
 	tok = construirToken(conteudoToken, NUM_HEX);
@@ -115,16 +112,16 @@ token scanner (char *texto, int *posicaotexto){
     } else {
 
       // Se o segundo digito for um número, sera um decimal
-      while (isdigit(text[i+j])) {
+      while (isdigit(texto[i+j])) {
         conteudoToken = realloc(conteudoToken, (j + 1) * sizeof(char));
-        conteudoToken[j] = text[i+j];
+        conteudoToken[j] = texto[i+j];
         j++;
       }
 
       conteudoToken = realloc(conteudoToken, (j + 1) * sizeof(char));
       conteudoToken[j] = '\0';
 
-      if (isalpha(text[i+j]) || text[i+j] == '_') { // Verifica se tinha erro no decimal
+      if (isalpha(texto[i+j]) || texto[i+j] == '_') { // Verifica se tinha erro no decimal
 	tok = construirToken(conteudoToken, ERRONUM);
       } else {
 	tok = construirToken(conteudoToken, NUM_DEC);
@@ -132,19 +129,19 @@ token scanner (char *texto, int *posicaotexto){
     }
   }
 
-  else if (isdigit(text[i])){
+  else if (isdigit(texto[i])){
 
     // Se o primeiro digito for numero diferente de 0, assume-se que deva ser decimal
-    while (isdigit(text[i+j])) {
+    while (isdigit(texto[i+j])) {
       conteudoToken = realloc(conteudoToken, (j + 1) * sizeof(char));
-      conteudoToken[j] = text[i+j];
+      conteudoToken[j] = texto[i+j];
       j++;
     }
 
     conteudoToken = realloc(conteudoToken, (j + 1) * sizeof(char));
     conteudoToken[j] = '\0';
 
-    if (isalpha(text[i+j]) || text[i+j] == '_') { // Verifica se tinha erro no decimal
+    if (isalpha(texto[i+j]) || texto[i+j] == '_') { // Verifica se tinha erro no decimal
       tok = construirToken(conteudoToken, ERRONUM);
     } else {
       tok = construirToken(conteudoToken, NUM_DEC);
@@ -152,26 +149,23 @@ token scanner (char *texto, int *posicaotexto){
       
   }
 
-  else if (text[i] == ' ' || text[i] == '\t'){
+  else if (texto[i] == ' ' || texto[i] == '\t'){
 
     // Se for espaco ou \t, o token sera de espaco (junta todos espacos em um token so de espaco)
-    while (text[i+j] == ' ' || text[i+j] == '\t') { j++; }
-    tok = construirToken(" ",ESPACO);
+    while (texto[i+j] == ' ' || texto[i+j] == '\t') { j++; }
+    tok = construirToken(" ",ESP);
 
   }
 
-  else if (text[i]==';'){
+  else if (texto[i]==';'){
 
     // Se for ; sera comentario, e sera ignorado todo o comentario
-    while (text[i+j] != '\n' && text[i+j] != '\0') { j++; }
+    while (texto[i+j] != '\n' && texto[i+j] != '\0') { j++; }
     tok = construirToken(";",PTVIR);
 
   }
-
   else {
-
     switch (texto[i]) {
-
     case ',' :
       tok = construirToken(",",VIR);
       break;
@@ -199,7 +193,7 @@ token scanner (char *texto, int *posicaotexto){
     }
   }
 
-  *posicaoTexto = i + j;
+  *posicaotexto = i + j;
 
   return tok;
 
@@ -220,7 +214,7 @@ line construirLinha (int *posicaoTexto, char *texto, int numeroDaLinha) {
 
   while (tok.tipo!=FIM_LINHA && tok.tipo!=FIM){
     
-    if (tok.tipo != ESPACO && tok.tipo != PTVIR) {
+    if (tok.tipo != ESP && tok.tipo != PTVIR) {
       
       toks = realloc(toks, (posToken + 1) * sizeof(token));
       toks[posToken] = tok;
@@ -246,8 +240,8 @@ line construirLinha (int *posicaoTexto, char *texto, int numeroDaLinha) {
 
 listaLinhas *limpaLista(listaLinhas *head) { // Tira linhas vazias
   
-  listaDeLinhas *aux = head;
-  listaDeLinhas *ant = NULL;
+  listaLinhas *aux = head;
+  listaLinhas *ant = NULL;
 
   while (aux->prox != NULL) {
 
@@ -277,9 +271,9 @@ listaLinhas *construirListaLinhas(char *texto){
   listaLinhas *head = (listaLinhas*) malloc(sizeof(listaLinhas));
   listaLinhas *aux  = head;
 
-  line l = construirLinha(&posText,texto,numeroLinha);
+  line l = construirLinha(&posTexto,texto,numeroLinha);
 
-  while(l->linha.token[0].tipo != FIM){
+  while(l.tokens[0].tipo != FIM){
   
     aux->linha = l;
 
@@ -296,4 +290,21 @@ listaLinhas *construirListaLinhas(char *texto){
 
   return limpaLista(head);
 
+}
+
+void imprimeLinhas(listaLinhas *list){
+
+  listaLinhas *aux = list;
+  int i;
+
+  printf("\n");
+  while(aux->prox!=NULL){
+    i=0;
+    while((aux->linha.tokens[i].tipo!=FIM)&&(aux->linha.tokens[i].tipo!=FIM_LINHA)){
+      printf("%s ",aux->linha.tokens[i].conteudo);
+      i++;
+    }
+    printf("\n");
+    aux = aux->prox;
+  }
 }
