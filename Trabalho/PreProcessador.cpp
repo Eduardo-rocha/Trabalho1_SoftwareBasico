@@ -12,6 +12,8 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
+#include <vector>
+
 
 using namespace std;
 
@@ -22,12 +24,25 @@ struct EquateStruct {
     EquateStruct *next;
 } ;
 
+string retorno = "";
+void ProcurarLista(EquateStruct *a1, string ArgumentoIF){
+    retorno = "";
+    if (a1 !=NULL) {
+        if (a1->nome == ArgumentoIF)
+            retorno = a1->valor;
+        else
+            ProcurarLista(a1->next, ArgumentoIF);
+    }
+}
+
 
 int main(int argc, const char * argv[]) {
     
     ifstream ArquivoASM ("input.txt"); // input
     ofstream ArquivoPRE ("output.txt"); // output
     string line;
+    bool Descartar2LinhasIF = false;
+    bool DescartarLinhaIF = false;
     
     // Teste se ambos os aquivos foram abertos corretamente
     if (!(ArquivoPRE.is_open() && ArquivoASM.is_open()))
@@ -36,9 +51,22 @@ int main(int argc, const char * argv[]) {
         return 0;
     }
     
+    EquateStruct *InicioListaEqu;
+    EquateStruct *FimListaEqu;
+    InicioListaEqu = new EquateStruct;
+    InicioListaEqu->valor = "";
+    InicioListaEqu->nome = "";
+    InicioListaEqu->next = NULL;
+    FimListaEqu = InicioListaEqu;
+    
+    int ContadorLinhas = 0;
+    vector<int> NumeroDasLinhas;
+    
     // Percorrer todas as linhas do arquivo
     while ( getline(ArquivoASM,line) )
     {
+        ContadorLinhas++;
+        
         bool LinhaVazia = true; // Flag que indica ao final do FOR se a linha está vazia
         char Caractere = 0;
         char CaractereAnterior;
@@ -107,35 +135,69 @@ int main(int argc, const char * argv[]) {
                 line.erase (line.begin()+line.length()-1);
         
         // Procurar EQU na linha -----------------------------------------------------------------------
-        size_t foundEQU = line.find("EQU");//foundEQU = unsig int com a posição
+        size_t foundEQU = line.find("EQU");//foundEQU = unsigned int com a posição
+        EquateStruct *aux;
+        bool DescartarLinhaEQU = false;
         if (foundEQU!=string::npos)
         {
-            //Procurar Label
-            
-            //Procurar Valor
-            
-            //Salvar
+            DescartarLinhaEQU = true;
+            aux = new EquateStruct;
+            aux->valor = line.substr(foundEQU+4, line.length()-1);
+            aux->nome = line.substr(0,foundEQU-2);
+            if (InicioListaEqu->nome == "")
+                InicioListaEqu = aux;
+            else
+                FimListaEqu->next = aux;
+            FimListaEqu = aux;
         }
         
         // Procurar IF na linha ------------------------------------------------------------------------
-        
-        
-        
-        
-        
-        
+        if (!LinhaVazia)
+        {
+            if (Descartar2LinhasIF)
+            {
+                DescartarLinhaIF = true;
+                Descartar2LinhasIF = false;
+            }else
+                DescartarLinhaIF = false;
+            size_t foundIF = line.find("IF");//foundEQU = unsigned int com a posição
+            if (foundIF!=string::npos)
+            {
+                DescartarLinhaIF = true;
+                string ArgumentoIF = line.substr(foundIF+3, line.length()-1);
+                if (ArgumentoIF == "0")
+                {
+                    DescartarLinhaIF = true;
+                    Descartar2LinhasIF = true;
+                }else if (ArgumentoIF != "1")
+                {
+                    //Procurar argumento na lista EQU
+                    ProcurarLista(InicioListaEqu, ArgumentoIF);
+                    string Argumento = retorno;
+                    if (Argumento == ""){
+                        cout << "ERROR:(linha " << ContadorLinhas << ") " << ArgumentoIF << " não declarado.";
+                    }else
+                    {
+                        if (Argumento == "0")
+                        {
+                            DescartarLinhaIF = true;
+                            Descartar2LinhasIF = true;
+                        }else if (Argumento != "1")
+                            cout << "ERROR:(linha " << ContadorLinhas << ") " << ArgumentoIF << " possui declaração diferente de '0' ou '1'.";
+                    }
+                }
+            }
+        }
         
         
         // Escrever linha no arquivo de saida
-        if (!LinhaVazia) // linha não vazia
+        if (!LinhaVazia && !DescartarLinhaIF && !DescartarLinhaEQU) // linha não vazia
+        {
             ArquivoPRE << line << "\n";
+            NumeroDasLinhas.push_back(ContadorLinhas);
+            cout << NumeroDasLinhas.back() << "\n";
+        }
     }
-    
-    
-    
-    
-    
-    
     
     
     ArquivoPRE.close();
