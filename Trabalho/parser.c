@@ -71,13 +71,13 @@ operando pegarOperador(token *toks, int *c, int ln) {
   t1 = toks[i].tipo;
 
   if (t1 == WORD || t1 == NUM_DEC || t1 == NUM_HEX) {
-    
+
     op.tipo =
-      t1 == WORD ? PALAVRA : NUMERO;
+      t1 == WORD ? PALAVRA : NUM;
 
     op.conteudoChar = toks[i].conteudo;
     op.conteudoInt =
-      t1 == WORD ? 0 : (t1== DEC_NUM ? (int)strtol(toks[i].conteudo,NULL,10) : (int)strtol(toks[i].conteudo,NULL,16));
+      t1 == WORD ? 0 : (t1== NUM_DEC ? (int)strtol(toks[i].conteudo,NULL,10) : (int)strtol(toks[i].conteudo,NULL,16));
 
     t2 = toks[i+1].tipo;
 
@@ -90,9 +90,10 @@ operando pegarOperador(token *toks, int *c, int ln) {
       *c = i + 2;
 
     else if (t2 != MAIS && t2 != MENOS)
-      
-      erro = MA_FORMACAO_DOS_OPERADORES;
-
+      {
+	erro = MA_FORMACAO_DOS_OPERADORES;
+	printf("\naqui\n");
+      }
     else {
 
       t3 = toks[i+2].tipo;
@@ -100,12 +101,12 @@ operando pegarOperador(token *toks, int *c, int ln) {
       if (t3 == NUM_DEC || t3 == NUM_HEX || t3 == WORD) {
       
         *c = i + 3;
-        op.temIncremento = TRUE;
-        op.sinalDoIncremento = t2 == MAIS ? POS : NEG;
-        op.tipoDeIncremento = t3 == WORD ? PALAVRA : NUM;
+        op.temInc = TRUE;
+        op.sinalInc = t2 == MAIS ? POS : NEG;
+        op.tipoInc = t3 == WORD ? PALAVRA : NUM;
         op.incrementoChar = toks[i+2].conteudo;
 	op.incrementoInt =
-	  t3 == WORD ? 0 : (t3== DEC_NUM ? (int)strtol(toks[i+2].conteudo,NULL,10) : (int)strtol(toks[i+2].conteudo,NULL,16));
+	  t3 == WORD ? (int)0 : (t3 == NUM_DEC ? (int)strtol(toks[i+2].conteudo,NULL,10) : (int)strtol(toks[i+2].conteudo,NULL,16));
 
       } else erro = MA_FORMACAO_DOS_OPERADORES;
 
@@ -123,21 +124,21 @@ operando pegarOperador(token *toks, int *c, int ln) {
       
       op.conteudoChar = toks[i].conteudo;
       op.conteudoInt =
-	t1 == WORD ? 0 : (t1== DEC_NUM ? (int)strtol(toks[i].conteudo,NULL,10) : (int)strtol(toks[i].conteudo,NULL,16));
+	t1 == WORD ? 0 : (t1== NUM_DEC ? (int)strtol(toks[i].conteudo,NULL,10) : (int)strtol(toks[i].conteudo,NULL,16));
       t2 = toks[i+1].tipo;
 
       if (t2 == FIM_LINHA || t2 ==  FIM)
       
         *c = i + 1;
 
-      else if (t2 == VIRGULA)
+      else if (t2 == VIR)
       
         *c = i + 2;
     
       else if (t2 != MAIS && t2 != MENOS)
-      
+
         erro = MA_FORMACAO_DOS_OPERADORES;
-    
+      
       else {
       
         t3 = toks[i+2].tipo;
@@ -145,26 +146,25 @@ operando pegarOperador(token *toks, int *c, int ln) {
         if (t3 == NUM_DEC || t3 == NUM_HEX) {
         
           *c = i + 3;
-          op.temIncremento = TRUE;
-          op.sinalDoIncremento = t2 == MAIS ? POS : NEG;
-          op.tipoDeIncremento =
+          op.temInc = TRUE;
+          op.sinalInc = t2 == MAIS ? POS : NEG;
+          op.tipoInc =
             t3 == WORD ? PALAVRA : NUM;
           op.incrementoChar = toks[i+2].conteudo;
 	  op.incrementoInt =
-	    t3 == WORD ? 0 : (t3== DEC_NUM ? (int)strtol(toks[i+2].conteudo,NULL,10) : (int)strtol(toks[i+2].conteudo,NULL,16));
+	    t3 == WORD ? 0 : (t3== NUM_DEC ? (int)strtol(toks[i+2].conteudo,NULL,10) : (int)strtol(toks[i+2].conteudo,NULL,16));
         
-        } else erro = MA_FORMACAO_DOS_OPERADORES;
+        } else {erro = MA_FORMACAO_DOS_OPERADORES;}
 
       }
 
-    } else MA_FORMACAO_DOS_OPERADORES;
+    } else erro=MA_FORMACAO_DOS_OPERADORES;
     
   } else {
 
-    op.operadorPresente = FALSE;
+    op.temOp = FALSE;
 
   }
-
   temErroSintatico(erro,ln);
   return op;
 
@@ -181,8 +181,8 @@ char *pegarLabel(line l, bool *temLabel) {
   toks = l.tokens;
   
   // ver se a linha tem dois pontos (:)
-  while (toks[i].tipo != FIM_DE_LINHA) {
-    if (toks[i].tipo == DOIS_PONTOS) {
+  while (toks[i].tipo != FIM_LINHA) {
+    if (toks[i].tipo == DOISPTS) {
       tem2Pontos = TRUE;
       break;
     }
@@ -205,7 +205,7 @@ char *pegarLabel(line l, bool *temLabel) {
 
   } else *temLabel = FALSE;
 
-  erroSintaticoSe(erro,l.num);
+  temErroSintatico(erro,l.num);
 
   return label;
 
@@ -228,7 +228,7 @@ comando pegarInstrucao (line l, int start) {
 
   if (!existe) erro = COMANDO_NAO_EXISTE;
 
-  erroSintaticoSe(erro,l.num);
+  temErroSintatico(erro,l.num);
 
   return numero;
 }
@@ -248,9 +248,11 @@ instrucao pegarOperandos (line l, int numOperadores, int start) {
 
   case 0 :
     
-    if (toks[j].tipo == FIM_LINHA)
+    if (toks[j].tipo == FIM_LINHA){
+      ins.primeiro.temOp = FALSE;
+      ins.segundo.temOp = FALSE;
       ins.numeroDeOperandos = 0;
-    else
+    }else
       erro = NUMERO_DE_OPERADORES_ERRADO;
     
     break;
@@ -259,10 +261,13 @@ instrucao pegarOperandos (line l, int numOperadores, int start) {
 
     op = pegarOperador(toks,&j,l.num);
 
-    if (!op.temOp || toks[j].tipo != FIM_DE_LINHA)
+    if (!op.temOp || toks[j].tipo != FIM_LINHA)
       erro = NUMERO_DE_OPERADORES_ERRADO;
 
     ins.primeiro = op;
+    ins.primeiro.temOp = TRUE;
+    ins.segundo.temOp = FALSE;
+
     ins.numeroDeOperandos = 1;
 
     break;
@@ -271,18 +276,20 @@ instrucao pegarOperandos (line l, int numOperadores, int start) {
     
     op = pegarOperador(toks,&j,l.num);
 
-    if (!op.operadorPresente)
+    if (!op.temOp)
       erro = NUMERO_DE_OPERADORES_ERRADO;
 
-    res.primeiro = op;
+    ins.primeiro = op;
+    ins.primeiro.temOp = TRUE;
+    ins.segundo.temOp = TRUE;
 
     op = pegarOperador(toks,&j,l.num);
     
-    if (!op.operadorPresente || toks[j].tipo != FIM_DE_LINHA)
+    if (!op.temOp || toks[j].tipo != FIM_LINHA)
       erro = NUMERO_DE_OPERADORES_ERRADO;
     
-    res.segundo = op;
-    res.numeroDeOperandos = 2;
+    ins.segundo = op;
+    ins.numeroDeOperandos = 2;
 
     break;
 
@@ -290,9 +297,9 @@ instrucao pegarOperandos (line l, int numOperadores, int start) {
     
     op = pegarOperador(toks,&j,l.num);
     
-    if (!ins.temOp)
+    if (!op.temOp)
 
-      res.numeroDeOperandos = 0;
+      ins.numeroDeOperandos = 0;
 
     else {
 
@@ -313,7 +320,7 @@ instrucao pegarOperandos (line l, int numOperadores, int start) {
 
   }
 
-  erroSintaticoSe(erro,l.num);
+  temErroSintatico(erro,l.num);
 
   return ins;
 
@@ -329,17 +336,17 @@ instrucao linhaParaInstrucao(line l) {
   int instrStart;
   int comando;
 
-  ins.numeroDaLinha = l.num;
+  ins.numeroLinha = l.num;
   toks = l.tokens;
 
-  label = getLabel(l, &temLabel);
+  label = pegarLabel(l, &temLabel);
 
   instrStart = temLabel ? 2 : 0; // se tem label pula a label e os 2 pontos
 
-  comando = getInstrucao(l, instrStart);
+  comando = pegarInstrucao(l, instrStart);
 
   ops = 
-    getOperandos(l, numeroDeOperadores[com],instrStart + 1);
+    pegarOperandos(l, numeroOp[comando],instrStart + 1);
   
   ins.temLabel = temLabel;
   ins.label    = label;
@@ -352,10 +359,10 @@ instrucao linhaParaInstrucao(line l) {
 
 } 
 
-listaDeInstrucoes *linhasParaInstrucoes(listaDeLinhas *head) {
+listaDeInstrucoes *linhasParaInstrucoes(listaLinhas *head) {
   
   
-  listaDeLinhas *aux;
+  listaLinhas *aux;
   line l;
   instrucao instr;
 
@@ -365,7 +372,7 @@ listaDeInstrucoes *linhasParaInstrucoes(listaDeLinhas *head) {
 
   aux = head;
 
-  while (aux->next != NULL) {
+  while (aux->prox != NULL) {
 
     l = aux->linha;
 
@@ -376,10 +383,62 @@ listaDeInstrucoes *linhasParaInstrucoes(listaDeLinhas *head) {
       (listaDeInstrucoes*) malloc(sizeof(listaDeInstrucoes));
 
     res = res->next;
-    aux = aux->next;
+    aux = aux->prox;
 
   }
   
   return res_head;
 
+}
+
+void imprimeInstrucoes (listaDeInstrucoes *linst){
+
+  listaDeInstrucoes *aux = linst;
+  instrucao ins;
+  int i;
+
+  printf("\n-----------\n\n");  
+  while(aux->next!=NULL){
+
+    ins = aux->instr;
+    if(ins.temLabel) printf("%s: ",ins.label);
+    for (i = 0; i < 21; i++) {
+      if (ins.comando == comandos[i]) printf("%s ", comandString[i]);
+    }
+    if(ins.numeroDeOperandos!=0){
+      if(ins.primeiro.tipo==NUM){
+	if(ins.primeiro.sinal!=NEG) printf("%s",ins.primeiro.conteudoChar);
+	else if(ins.primeiro.sinal==NEG) printf("-%s",ins.primeiro.conteudoChar);
+	if(!ins.primeiro.temInc) printf(" ");
+	else if(ins.primeiro.sinalInc==POS) printf("+%s ",ins.primeiro.incrementoChar);
+	else printf("-%s ",ins.primeiro.incrementoChar);
+      } else{
+	printf("%s",ins.primeiro.conteudoChar);
+	if(!ins.primeiro.temInc) printf(" ");
+	else if(ins.primeiro.sinalInc==POS) printf("+%s ",ins.primeiro.incrementoChar);
+	else printf("-%s ",ins.primeiro.incrementoChar);
+      }
+      if(ins.numeroDeOperandos==2){
+	if(ins.segundo.tipo==NUM){
+	  if(ins.segundo.sinal!=NEG) printf("%s",ins.segundo.conteudoChar);
+	  else if(ins.segundo.sinal==NEG) printf("-%s",ins.segundo.conteudoChar);
+	  if(!ins.segundo.temInc) printf("\n");
+	  else if(ins.segundo.sinalInc==POS) printf("+%s\n",ins.segundo.incrementoChar);
+	  else printf("-%s\n",ins.segundo.incrementoChar);
+	} else{
+	  printf("%s",ins.segundo.conteudoChar);
+	  if(!ins.segundo.temInc) printf("\n");
+	  else if(ins.segundo.sinalInc==POS) printf("+%s\n",ins.segundo.incrementoChar);
+	  else printf("-%s\n",ins.segundo.incrementoChar);
+	}
+      }else{
+	printf("\n");
+      }
+    }else printf("\n");
+
+    aux=aux->next;
+  }
+
+  printf("\n-----------\n");
+  
 }
