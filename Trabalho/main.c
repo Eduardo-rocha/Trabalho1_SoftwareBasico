@@ -8,6 +8,28 @@
 #include "parser.c"
 #include "montador.c"
 
+int *numeroLinhasMacro (){
+
+  FILE *arq=fopen("NumeroDeLinhasM.bin","rb");
+  int *linhasMacro = (int*)malloc(sizeof(int));
+  int size = 0; 
+
+  if(!arq){
+    printf("Erro ao abrir arquivo NumeroDeLinhas.bin\n");
+    exit;
+  }
+
+  while(!feof(arq)){
+    fread(linhasMacro[size],sizeof(int),1,arq);
+    linhasMacro = realloc(linhasMacro, sizeof(int)*(size+1));
+    size++;
+  }
+  
+  fclose(arq);
+
+  return linhasMacro;
+}
+
 int main(int argc, char** argv) {
 
   // variavel global definida em lexer.h
@@ -56,8 +78,10 @@ int main(int argc, char** argv) {
   case 'o' : 
 
     /////////////////////////////////////////// Colocar o pre-proc aqui
+    
+    int *linhasMacro = numeroLinhasMacro();
 
-    lins = construirListaLinhas(texto); //////////////////////////////////////// No lugar de texto colocar string apos o pre-proc e o proc de macros
+    lins = construirListaLinhas(texto,linhasMacro); //////////////////////////////////////// No lugar de texto colocar string apos o pre-proc e o proc de macros
     //imprimeLinhas(lins);
     ins  = linhasParaInstrucoes(lins);
     //imprimeInstrucoes(ins);
