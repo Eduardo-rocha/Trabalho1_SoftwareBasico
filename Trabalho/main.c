@@ -30,6 +30,14 @@ int *numeroLinhasMacro (){
   return linhasMacro;
 }
 
+char* concatenar3(char *s1, char *s2)
+{
+  char *result = malloc(strlen(s1)+strlen(s2)+1);
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
+}
+
 int main(int argc, char** argv) {
 
   // variavel global definida em lexer.h
@@ -63,7 +71,11 @@ int main(int argc, char** argv) {
   case 'p' : 
     
     ////////////////////////////////////////// Gera arquivo pre-proc
-
+    char comp[] = "./preproc ";
+    char *entp = concat(arquivo_entrada," ");
+    char *saidap = concat(arquivo_saida,".p");
+    char *comandop = concat(com,entp,saidap);
+    system(comandop);
     break;
 
   
@@ -71,7 +83,16 @@ int main(int argc, char** argv) {
   case 'm' :
     
     //////////////////////////////////////////gera arquivo com macros resolvidas
-
+    char comp[] = "./preproc ";
+    char *entp = concat(arquivo_entrada," ");
+    char *saidap = concat(arquivo_saida,".p");
+    char *comandop = concat(com,entp,saidap);
+    system(comandop);
+    char comm[] = "./macro ";
+    char *entm = concat(saidap," ");
+    char *saidam = concat(arquivo_saida,".m");
+    char *comandom = concat(comm,ent,saidam);
+    system(comando);
     break;
 
   // Geração de código
@@ -79,6 +100,20 @@ int main(int argc, char** argv) {
 
     /////////////////////////////////////////// Colocar o pre-proc aqui
     
+    char comp[] = "./preproc ";
+    char *entp = concat(arquivo_entrada," ");
+    char *saidap = concat(arquivo_saida,".p");
+    char *comandop = concat(com,entp,saidap);
+    system(comandop);
+
+    char comm[] = "./macro ";
+    char *entm = concat(saidap," ");
+    char *saidam = concat(arquivo_saida,".m");
+    char *comandom = concat(comm,ent,saidam);
+    system(comandom);
+
+    char *texto = textoDoArquivo(saidam);
+
     int *linhasMacro = numeroLinhasMacro();
 
     lins = construirListaLinhas(texto,linhasMacro); //////////////////////////////////////// No lugar de texto colocar string apos o pre-proc e o proc de macros
