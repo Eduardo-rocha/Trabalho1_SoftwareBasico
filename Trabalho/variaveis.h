@@ -62,7 +62,7 @@ typedef enum {
   EQU      = 17,
   IF       = 18,
   MACRO    = 19,
-  FIMMACRO = 20 
+  ENDMACRO = 20 
 } comando;
 
 typedef enum {
@@ -142,7 +142,7 @@ typedef struct {
   sinal sinalInc;
   tipoDeOperador tipoInc;
   char *incrementoChar;
-  int *incrementoInt;
+  int incrementoInt;
 } operando;
 
 typedef struct {
@@ -164,3 +164,19 @@ typedef struct instrs {
   instrucao instr;
   struct instrs *next;
 } listaDeInstrucoes; //instructions;
+
+/** Tabela de Simbolos **/
+
+typedef struct{
+  char *label;
+  int endereco;
+  int tamanho;
+  bool constante;
+}simbolo;
+
+typedef struct tabsim{
+  simbolo simbolo;
+  struct tabsim *next;
+}tabelaDeSimbolos;
+
+bool ERRO_EXEC = FALSE;

@@ -40,6 +40,9 @@ int main(int argc, const char * argv[]) {
     
     ifstream ArquivoASM ("input.txt"); // input
     ofstream ArquivoPRE ("output.txt"); // output
+    
+    ofstream fileBin ("NumeroDeLinhas.bin", ios::binary);// arq que guarda o numero de linhas da saída em relação ao arq de entrada
+    
     string line;
     bool Descartar2LinhasIF = false;
     bool DescartarLinhaIF = false;
@@ -144,11 +147,52 @@ int main(int argc, const char * argv[]) {
             aux = new EquateStruct;
             aux->valor = line.substr(foundEQU+4, line.length()-1);
             aux->nome = line.substr(0,foundEQU-2);
+            
+            // procurar por declaração repetida
+            ProcurarLista(InicioListaEqu, aux->nome);
+            if(retorno != ""){
+                cout << "ERRO semântico:(linha " << ContadorLinhas << ") " << " declaração de EQU repetida.\n";
+            }
+            
             if (InicioListaEqu->nome == "")
                 InicioListaEqu = aux;
             else
                 FimListaEqu->next = aux;
             FimListaEqu = aux;
+        }
+        
+        // Procurar simbolos definidos com EQU ---------------------------------------------------------
+        int PrimeiroChar = 0;
+        string palavra;
+        for (unsigned i=0; i<line.length(); ++i)
+        {
+            Caractere = line.at(i);
+            
+            if(Caractere == ' '){
+                palavra = line.substr(PrimeiroChar, i-PrimeiroChar);
+                ProcurarLista(InicioListaEqu, palavra);
+                if(retorno != "")
+                {
+                    if(PrimeiroChar>0)
+                        line = line.substr(0, PrimeiroChar) + retorno + line.substr(i, line.length()-i);
+                    else
+                        line = retorno + line.substr(i, line.length()-i);
+                    
+                }
+                PrimeiroChar = i+1;
+            }
+            if(i == line.length()-1){
+                palavra = line.substr(PrimeiroChar, i+1-PrimeiroChar);
+                ProcurarLista(InicioListaEqu, palavra);
+                if(retorno != "")
+                {
+                    if(PrimeiroChar>0)
+                        line = line.substr(0, PrimeiroChar) + retorno;
+                    else
+                        line = retorno;
+                    
+                }
+            }
         }
         
         // Procurar IF na linha ------------------------------------------------------------------------
@@ -175,7 +219,7 @@ int main(int argc, const char * argv[]) {
                     ProcurarLista(InicioListaEqu, ArgumentoIF);
                     string Argumento = retorno;
                     if (Argumento == ""){
-                        cout << "ERROR:(linha " << ContadorLinhas << ") " << ArgumentoIF << " não declarado.";
+                        cout << "ERRO semântico:(linha " << ContadorLinhas << ") " << ArgumentoIF << " não declarado.";
                     }else
                     {
                         if (Argumento == "0")
@@ -183,7 +227,7 @@ int main(int argc, const char * argv[]) {
                             DescartarLinhaIF = true;
                             Descartar2LinhasIF = true;
                         }else if (Argumento != "1")
-                            cout << "ERROR:(linha " << ContadorLinhas << ") " << ArgumentoIF << " possui declaração diferente de '0' ou '1'.";
+                            cout << "ERRO semântico:(linha " << ContadorLinhas << ") " << ArgumentoIF << " possui declaração diferente de '0' ou '1'.";
                     }
                 }
             }
@@ -195,13 +239,16 @@ int main(int argc, const char * argv[]) {
         {
             ArquivoPRE << line << "\n";
             NumeroDasLinhas.push_back(ContadorLinhas);
-            cout << NumeroDasLinhas.back() << "\n";
+            //cout << NumeroDasLinhas.back() << "\n";
+            
+            fileBin.write ((char *)&ContadorLinhas, sizeof(ContadorLinhas));
         }
     }
     
     
     ArquivoPRE.close();
     ArquivoASM.close();
+    fileBin.close();
     
     return 0;
 }
