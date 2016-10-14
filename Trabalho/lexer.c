@@ -263,7 +263,7 @@ listaLinhas *limpaLista(listaLinhas *head) { // Tira linhas vazias
 
 }
 
-listaLinhas *construirListaLinhas(char *texto){
+listaLinhas *construirListaLinhas(char *texto, int *linhasMacro){
 
   int posTexto = 0;
   int numeroLinha = 1;
@@ -271,14 +271,14 @@ listaLinhas *construirListaLinhas(char *texto){
   listaLinhas *head = (listaLinhas*) malloc(sizeof(listaLinhas));
   listaLinhas *aux  = head;
 
-  line l = construirLinha(&posTexto,texto,numeroLinha);
+  line l = construirLinha(&posTexto,texto,linhasMacro[numeroLinha]);
 
   while(l.tokens[0].tipo != FIM){
   
     aux->linha = l;
 
     numeroLinha++;
-    l = construirLinha(&posTexto,texto,numeroLinha);
+    l = construirLinha(&posTexto,texto,linhasMacro[numeroLinha]);
 
     aux->prox = (listaLinhas*) malloc(sizeof(listaLinhas));
     aux = aux->prox;
