@@ -82,8 +82,11 @@ bool ProcurarMacroJaDef(string line, Macro *InicioMacro){
 
 int main(int argc, const char * argv[]) {
     
-    ifstream ArquivoPRE ("input.txt"); // input
-    ofstream ArquivoMCR ("output.txt"); // output
+    string arquivo_entrada = argv[1];
+    string arquivo_saida   = argv[2];
+    
+    ifstream ArquivoPRE (arquivo_entrada); // input
+    ofstream ArquivoMCR (arquivo_saida); // output
     
     ifstream fileBinLeitura ("NumeroDeLinhas.bin", ios::binary);
     ofstream fileBinSaida ("NumeroDeLinhasM.bin", ios::binary);// arq que guarda o numero de linhas da saída em relação ao arq de entrada

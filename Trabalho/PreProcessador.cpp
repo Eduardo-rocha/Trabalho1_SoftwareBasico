@@ -38,8 +38,11 @@ void ProcurarLista(EquateStruct *a1, string ArgumentoIF){
 
 int main(int argc, const char * argv[]) {
     
-    ifstream ArquivoASM ("input.txt"); // input
-    ofstream ArquivoPRE ("output.txt"); // output
+    string arquivo_entrada = argv[1];
+    string arquivo_saida   = argv[2];
+    
+    ifstream ArquivoASM (arquivo_entrada); // input
+    ofstream ArquivoPRE (arquivo_saida); // output
     
     ofstream fileBin ("NumeroDeLinhas.bin", ios::binary);// arq que guarda o numero de linhas da saída em relação ao arq de entrada
     
