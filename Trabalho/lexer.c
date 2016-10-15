@@ -278,7 +278,7 @@ listaLinhas *construirListaLinhas(char *texto, int *linhasMacro){
     aux->linha = l;
 
     numeroLinha++;
-    l = construirLinha(&posTexto,texto,linhasMacro[numeroLinha]);
+    l = construirLinha(&posTexto,texto,linhasMacro[numeroLinha-1]);
 
     aux->prox = (listaLinhas*) malloc(sizeof(listaLinhas));
     aux = aux->prox;
