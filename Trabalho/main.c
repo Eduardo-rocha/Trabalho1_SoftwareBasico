@@ -10,20 +10,23 @@
 
 int *numeroLinhasMacro (){
 
-  FILE *arq=fopen("NumeroDeLinhasM.bin","rb");
-  int *linhasMacro = (int*)malloc(sizeof(int));
+  FILE *arq = fopen("NumeroDeLinhasM.bin","rb");
+  //  int *linhasMacro = (int*)malloc(sizeof(int));
   int size = 0; 
-
+  int *linhasMacro = (int*)malloc(sizeof(int));
+  //  int linhasMacro2[1000];
   if(!arq){
-    printf("Erro ao abrir arquivo NumeroDeLinhas.bin\n");
+    printf("Erro ao abrir arquivo NumeroDeLinhasM.bin\n");
     exit;
   }
 
-  while(!feof(arq)){
+  while(1){
     fread(&linhasMacro[size],sizeof(int),1,arq);
-    linhasMacro = realloc(linhasMacro, sizeof(int)*(size+1));
     size++;
+    linhasMacro = realloc(linhasMacro, sizeof(int)*(size+1));
+    if(feof(arq)) break;
   }
+  
   
   fclose(arq);
 
@@ -39,7 +42,6 @@ char* concatenar(char *s1, char *s2)
 }
 
 int main(int argc, char** argv) {
-
   // variavel global definida em lexer.h
   // define se houveram ou não erros durante
   // todo o processamento
@@ -58,7 +60,6 @@ int main(int argc, char** argv) {
     printf("\tO segundo argumento esta mal formado:\n\t -p: pre-processado\n\t -m: arquivo apos a resolucao das macros\n\t -o: para o arquivo objeto final\n");
   }
 
-  char *texto = textoDoArquivo(arquivo_entrada);
   char op = operacao[1];  
   listaLinhas *lins;
   listaDeInstrucoes *ins, *ins2;
@@ -99,16 +100,8 @@ int main(int argc, char** argv) {
 
     /////////////////////////////////////////// Colocar o pre-proc aqui
     
-    printf("\na\n\n");
-
     system(comandop);
-    printf("%s\n",comandop);
-    printf("\nb\n\n");
-    
     system(comandom);
-
-    printf("%s\n",comandom);
-    printf("\nc\n\n");
 
     char *texto = textoDoArquivo(saidam);
 
@@ -127,7 +120,7 @@ int main(int argc, char** argv) {
     if (!ERRO_EXEC) {
       sprintf(arquivo_saida,"%s.o",arquivo_saida);
       FILE *fp = fopen(arquivo_saida,"w");
-      fprintf(fp,"%s",final);
+      //      fprintf(fp,"%s",final);
       fclose(fp);
       printf("\n%s\n",final);
       printf("\nCompilação bem sucedida.\n\n");
