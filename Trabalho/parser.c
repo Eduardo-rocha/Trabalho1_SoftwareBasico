@@ -92,7 +92,6 @@ operando pegarOperador(token *toks, int *c, int ln) {
     else if (t2 != MAIS && t2 != MENOS)
       {
 	erro = MA_FORMACAO_DOS_OPERADORES;
-	printf("\naqui\n");
       }
     else {
 
