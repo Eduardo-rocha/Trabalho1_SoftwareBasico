@@ -2,6 +2,9 @@
 
 // labelExiste e uma funcao que verifica se uma label existe na tabela de simbolos
 
+bool temText = FALSE;
+bool temData = FALSE;
+
 void sprintf_(char **buf, char *str) {
   
   int n, m;
@@ -270,13 +273,29 @@ void geraStringFinal (char **buf,instrucao instr, int numeroLinha, bool *comecoD
     *temStop = TRUE;
     break;
   case SECTION:
-    if(strcmp(instr.primeiro.conteudoChar,"DATA")==0)
-      *comecoData = TRUE;
-    else{
-      printf("\nERRO semantico na linha %d: SECTION invalido\n",numeroLinha);
+    if(strcmp(instr.primeiro.conteudoChar,"DATA")==0){
+      if(*comecoData == FALSE){
+	*comecoData = TRUE;
+	temData = TRUE;
+      }
+      else{
+	printf("\n ERRO semantico na linha %d: duas secoes de DATA\n", numeroLinha);
+	ERRO_EXEC = TRUE;
+      }
+    } else if (strcmp(instr.primeiro.conteudoChar,"TEXT")==0){
+      if(temText == FALSE){ 
+	temText = TRUE;
+      }
+      else{
+	printf("\n ERRO semantico na linha %d: duas secoes de TEXT\n", numeroLinha);
+	ERRO_EXEC = TRUE;
+      }
+    } else{
+      printf("\n ERRO semantico na linha %d: SECTION invalido\n", numeroLinha);
       ERRO_EXEC = TRUE;
     }
-    break;
+  
+  break;
   case SPACE:
     if(instr.numeroDeOperandos==1){
       while(i<op1){
@@ -296,15 +315,19 @@ void geraStringFinal (char **buf,instrucao instr, int numeroLinha, bool *comecoD
   case EQU:
     printf("\nERRO semantico na linha %d: EQU mal posicionado (Deve estar antes da secao TEXT)\n",numeroLinha);
     ERRO_EXEC = TRUE;
+    break;
   case IF:
     printf("\nERRO semantico na linha %d: IF mal posicionado\n",numeroLinha);
     ERRO_EXEC = TRUE;
+    break;
   case MACRO:
     printf("\nERRO semantico na linha %d: MACRO mal posicionado\n",numeroLinha);
     ERRO_EXEC = TRUE;
+    break;
   case ENDMACRO:
     printf("\nERRO semantico na linha %d: ENDMACRO mal posicionado ou formulado\n",numeroLinha);
     ERRO_EXEC = TRUE;
+    break;
   }
 }
 
@@ -382,18 +405,16 @@ char *geraCodigoFinal (listaDeInstrucoes *linst,tabelaDeSimbolos *tab, char *nom
   bool temStop = FALSE;
   
   char *buf;
-
+  
   buf = (char*)calloc(0,sizeof(char));
-
-
+  
+  
   // A primeira coisa que o programa tem que pegar eh o section text
-
-  if ((auxL->instr.comando!=SECTION)&&(strcmp(auxL->instr.primeiro.conteudoChar,"TEXT")!=0)){
-    printf("\nErro semantico: O programa deve conter SECTION TEXT como primeira secao");
+  
+  if (auxL->instr.comando!=SECTION){
+    printf("\nErro semantico: O programa deve conter SECTION como primeira secao");
     ERRO_EXEC = TRUE;
   }
-  
-  auxL = auxL->next;
 
   // vai incrementando a string ate chegar na penultima linha
 
@@ -410,6 +431,10 @@ char *geraCodigoFinal (listaDeInstrucoes *linst,tabelaDeSimbolos *tab, char *nom
     printf("\nErro semantico: Programa nao apresentou SECTION DATA\n");
     ERRO_EXEC = TRUE;
   }
+  if(temText==FALSE){
+    printf("\nErro semantico: Programa nao apresentou SECTION TEXT\n");
+    ERRO_EXEC = TRUE;
+  }
   if(temStop==FALSE){
     printf("\nErro semantico: Programa nao apresentou STOP\n");
     ERRO_EXEC = TRUE;
@@ -417,6 +442,27 @@ char *geraCodigoFinal (listaDeInstrucoes *linst,tabelaDeSimbolos *tab, char *nom
   
   // caso tudo ocorra corretamente, a funcao retorna a string contendo a traducao do codigo
   return buf;
+}
+
+listaDeInstrucoes *colocaTextInicio(listaDeInstrucoes *linst){
+  listaDeInstrucoes *aux = linst;
+  listaDeInstrucoes *pre;
+  listaDeInstrucoes *inicio;
+  listaDeInstrucoes *inicioData;
+  if((aux->instr.comando == SECTION)&&(strcmp(aux->instr.primeiro.conteudoChar,"DATA")==0)){
+    inicioData = aux;
+    while((strcmp(aux->instr.primeiro.conteudoChar,"TEXT")!=0)&&(aux->next!=NULL)){
+      pre=aux;
+      aux = aux->next;
+    }
+    pre->next = NULL;
+    inicio = aux;
+    while((aux->next)->next!=NULL){
+      aux = aux->next;
+    }
+    aux->next = inicioData;
+  }
+  return inicio;
 }
 
 void imprimeTabelaSim(tabelaDeSimbolos *simtab){
