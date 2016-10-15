@@ -20,7 +20,7 @@ int *numeroLinhasMacro (){
   }
 
   while(!feof(arq)){
-    fread(linhasMacro[size],sizeof(int),1,arq);
+    fread(&linhasMacro[size],sizeof(int),1,arq);
     linhasMacro = realloc(linhasMacro, sizeof(int)*(size+1));
     size++;
   }
@@ -30,7 +30,7 @@ int *numeroLinhasMacro (){
   return linhasMacro;
 }
 
-char* concatenar3(char *s1, char *s2)
+char* concatenar(char *s1, char *s2)
 {
   char *result = malloc(strlen(s1)+strlen(s2)+1);
     strcpy(result, s1);
@@ -64,6 +64,16 @@ int main(int argc, char** argv) {
   listaDeInstrucoes *ins, *ins2;
   char *res;
   int ultimoEndereco;
+
+  char *entp = concatenar(arquivo_entrada," ");
+  char *saidap = concatenar(arquivo_saida,".p");
+  char *auxp = concatenar("./preproc ",entp);
+  char *comandop = concatenar(auxp,saidap);
+
+  char *entm = concatenar(arquivo_entrada," ");
+  char *saidam = concatenar(arquivo_saida,".m");
+  char *auxm = concatenar("./macro ",entm);
+  char *comandom = concatenar(auxm,saidam);
   
   switch(op) {
 
@@ -71,10 +81,6 @@ int main(int argc, char** argv) {
   case 'p' : 
     
     ////////////////////////////////////////// Gera arquivo pre-proc
-    char comp[] = "./preproc ";
-    char *entp = concat(arquivo_entrada," ");
-    char *saidap = concat(arquivo_saida,".p");
-    char *comandop = concat(com,entp,saidap);
     system(comandop);
     break;
 
@@ -83,16 +89,9 @@ int main(int argc, char** argv) {
   case 'm' :
     
     //////////////////////////////////////////gera arquivo com macros resolvidas
-    char comp[] = "./preproc ";
-    char *entp = concat(arquivo_entrada," ");
-    char *saidap = concat(arquivo_saida,".p");
-    char *comandop = concat(com,entp,saidap);
     system(comandop);
-    char comm[] = "./macro ";
-    char *entm = concat(saidap," ");
-    char *saidam = concat(arquivo_saida,".m");
-    char *comandom = concat(comm,ent,saidam);
-    system(comando);
+
+    system(comandom);
     break;
 
   // Geração de código
@@ -100,17 +99,16 @@ int main(int argc, char** argv) {
 
     /////////////////////////////////////////// Colocar o pre-proc aqui
     
-    char comp[] = "./preproc ";
-    char *entp = concat(arquivo_entrada," ");
-    char *saidap = concat(arquivo_saida,".p");
-    char *comandop = concat(com,entp,saidap);
-    system(comandop);
+    printf("\na\n\n");
 
-    char comm[] = "./macro ";
-    char *entm = concat(saidap," ");
-    char *saidam = concat(arquivo_saida,".m");
-    char *comandom = concat(comm,ent,saidam);
+    system(comandop);
+    printf("%s\n",comandop);
+    printf("\nb\n\n");
+    
     system(comandom);
+
+    printf("%s\n",comandom);
+    printf("\nc\n\n");
 
     char *texto = textoDoArquivo(saidam);
 
