@@ -8,6 +8,7 @@
 #include "parser.c"
 #include "montador.c"
 
+
 int *numeroLinhasMacro (){
 
   FILE *arq = fopen("NumeroDeLinhasM.bin","rb");
@@ -113,16 +114,18 @@ int main(int argc, char** argv) {
     //imprimeInstrucoes(ins);
 
     // geracao de codigo aqui
-
+    //    imprimeInstrucoes(ins);
+    ins = colocaTextInicio(ins);
+    //imprimeInstrucoes(ins);
     tabelaDeSimbolos *tab = primeiraPassagem(ins,&ultimoEndereco);
     //imprimeTabelaSim(tab);
     char *final = geraCodigoFinal(ins,tab,arquivo_saida,ultimoEndereco);
     if (!ERRO_EXEC) {
       sprintf(arquivo_saida,"%s.o",arquivo_saida);
       FILE *fp = fopen(arquivo_saida,"w");
-      //      fprintf(fp,"%s",final);
+      fprintf(fp,"%s",final);
       fclose(fp);
-      printf("\n%s\n",final);
+      //printf("\n%s\n",final);
       printf("\nCompilação bem sucedida.\n\n");
     }
     
