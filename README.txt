@@ -10,13 +10,13 @@ Para compilar:
 
 $ g++ -std=c++0x PreProcessador.cpp -o preproc
 
-$ g++ -std=c++0x Macro.cpp -o macro
+$ g++ -std=c++0x Macros.cpp -o macro
 
 $ gcc main.c
 
 Para usar basta usar:
 
-$./a.out nome_do_arquivo_alvo -flag nome_do_arquivo_saida
+$./a.out -flag nome_do_arquivo_alvo nome_do_arquivo_saida
 
 Onde as flags possíveis são:
 

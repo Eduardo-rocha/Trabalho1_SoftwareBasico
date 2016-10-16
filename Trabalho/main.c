@@ -53,8 +53,8 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  char *arquivo_entrada = argv[1];
-  char *operacao        = argv[2];
+  char *arquivo_entrada = argv[2];
+  char *operacao        = argv[1];
   char *arquivo_saida   = argv[3];
   
   if (operacao[0] != '-' || strlen(operacao) != 2){
