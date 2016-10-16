@@ -1,5 +1,7 @@
 /*
  *	William Motta, 0950050
+ *  Eduardo Moura Rocha, 120116014
+ *  William Yamada, 120138549
  *		Simulador de Assembly inventado
  *	Compilacao:
  *		g++ simulador.cpp -o simulador
