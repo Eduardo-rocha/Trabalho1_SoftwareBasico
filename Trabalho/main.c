@@ -68,12 +68,12 @@ int main(int argc, char** argv) {
   int ultimoEndereco;
 
   char *entp = concatenar(arquivo_entrada," ");
-  char *saidap = concatenar(arquivo_saida,".p");
+  char *saidap = concatenar(arquivo_saida,".pre");
   char *auxp = concatenar("./preproc ",entp);
   char *comandop = concatenar(auxp,saidap);
 
   char *entm = concatenar(arquivo_entrada," ");
-  char *saidam = concatenar(arquivo_saida,".m");
+  char *saidam = concatenar(arquivo_saida,".mcr");
   char *auxm = concatenar("./macro ",entm);
   char *comandom = concatenar(auxm,saidam);
   
