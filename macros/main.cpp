@@ -76,60 +76,60 @@ bool ProcurarMacroJaDef(string line, Macro *InicioMacro){
         }
         m1 = m1->next;
     }
-    
+
     return false;
 }
 
 int main(int argc, const char * argv[]) {
-    
+
     string arquivo_entrada = argv[1];
     string arquivo_saida   = argv[2];
-    
+
     ifstream ArquivoPRE (arquivo_entrada); // input
     ofstream ArquivoMCR (arquivo_saida); // output
-    
+
     ifstream fileBinLeitura ("NumeroDeLinhas.bin", ios::binary);
     ofstream fileBinSaida ("NumeroDeLinhasM.bin", ios::binary);// arq que guarda o numero de linhas da saída em relação ao arq de entrada
-    
+
     string line;
-    
+
     // Teste se ambos os aquivos foram abertos corretamente
     if (!(ArquivoPRE.is_open() && ArquivoMCR.is_open()))
     {
         cout << "Unable to open file";
         return 0;
     }
-    
+
     Macro *InicioMacro = NULL;
     Macro *FimMacro = NULL;
-    
+
     int ContadorLinhas = 0;
     vector<int> NumeroDasLinhas;
-    
+
     char Caractere;
-    
+
     // Percorrer todas as linhas do arquivo
     while ( getline(ArquivoPRE,line) )
     {
         fileBinLeitura.read ((char *)&ContadorLinhas, sizeof(ContadorLinhas));
-        
+
         size_t foundMacro = line.find("MACRO");//foundMACRO = unsigned int com a posição
         Macro *aux;
         if (foundMacro!=string::npos)
         {
-            
+
             aux = new Macro;
             aux->nome = line.substr(0,foundMacro-2);
             aux->l1 = NULL;
             aux->a1 = NULL;
             aux->next = NULL;
-            
+
             //Procurar declaraç˜åo repetida
             if(ProcurarMacroJaDef(aux->nome, InicioMacro)){
                 cout << "ERRO semântico:(linha " << ContadorLinhas << ") " << " declaração de MACRO repetida.\n";
             }
-            
-            
+
+
             if(InicioMacro == NULL){
                 InicioMacro = aux;
                 FimMacro = aux;
@@ -137,9 +137,9 @@ int main(int argc, const char * argv[]) {
                 FimMacro->next = aux;
                 FimMacro = aux;
             }
-            
-            
-            
+
+
+
             // Tem argumentos?
             if (foundMacro != line.length()-5)
             {
@@ -148,7 +148,7 @@ int main(int argc, const char * argv[]) {
                 for (unsigned i=foundMacro+6; i<line.length(); ++i)
                 {
                     Caractere = line.at(i);
-                    
+
                     if(Caractere == ','){
                         palavra = line.substr(PrimeiroChar, i-PrimeiroChar);
                         PrimeiroChar = i+2;
@@ -174,13 +174,13 @@ int main(int argc, const char * argv[]) {
                             aux->a1 = arg;
                         }
                     }
-                    
-                    
-                    
+
+
+
                 }
-                
+
             }
-            
+
             // Guardar linhas
             while ( getline(ArquivoPRE,line) )
             {
@@ -202,7 +202,7 @@ int main(int argc, const char * argv[]) {
                     break;// achou ENDMACRO
                 }
             }
-            
+
         }else if(ProcurarMacroJaDef(line, InicioMacro))
         {
             size_t inicio = 0, fim = 0;
@@ -215,7 +215,7 @@ int main(int argc, const char * argv[]) {
                 aux->nomeUso = line.substr(inicio, fim-inicio+1);
                 aux = aux->next;
             }
-            
+
             Linha *auxl = RetornarMacro->l1;
             while(auxl != NULL){
                 aux = RetornarMacro->a1;
@@ -229,16 +229,16 @@ int main(int argc, const char * argv[]) {
                     }
                     aux = aux->next;
                 }
-                
-                
+
+
                 ArquivoMCR << line << "\n";
                 fileBinSaida.write ((char *)&auxl->numeroDaLinha, sizeof(auxl->numeroDaLinha));
                 //cout << auxl->numeroDaLinha << "\n";
-                
+
                 auxl = auxl->next;
             }
-            
-            
+
+
         }else
         {
             // add line
@@ -246,10 +246,10 @@ int main(int argc, const char * argv[]) {
             fileBinSaida.write ((char *)&ContadorLinhas, sizeof(ContadorLinhas));
             //cout << ContadorLinhas << "\n";
         }
-        
-        
+
+
     }
-    
+
     return  0;
 }
 

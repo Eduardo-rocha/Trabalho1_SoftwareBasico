@@ -37,26 +37,26 @@ void ProcurarLista(EquateStruct *a1, string ArgumentoIF){
 
 
 int main(int argc, const char * argv[]) {
-    
+
     string arquivo_entrada = argv[1];
     string arquivo_saida   = argv[2];
-    
+
     ifstream ArquivoASM (arquivo_entrada); // input
     ofstream ArquivoPRE (arquivo_saida); // output
-    
+
     ofstream fileBin ("NumeroDeLinhas.bin", ios::binary);// arq que guarda o numero de linhas da saída em relação ao arq de entrada
-    
+
     string line;
     bool Descartar2LinhasIF = false;
     bool DescartarLinhaIF = false;
-    
+
     // Teste se ambos os aquivos foram abertos corretamente
     if (!(ArquivoPRE.is_open() && ArquivoASM.is_open()))
     {
         cout << "Unable to open file";
         return 0;
     }
-    
+
     EquateStruct *InicioListaEqu;
     EquateStruct *FimListaEqu;
     InicioListaEqu = new EquateStruct;
@@ -64,34 +64,34 @@ int main(int argc, const char * argv[]) {
     InicioListaEqu->nome = "";
     InicioListaEqu->next = NULL;
     FimListaEqu = InicioListaEqu;
-    
+
     int ContadorLinhas = 0;
     vector<int> NumeroDasLinhas;
-    
+
     // Percorrer todas as linhas do arquivo
     while ( getline(ArquivoASM,line) )
     {
         ContadorLinhas++;
-        
+
         bool LinhaVazia = true; // Flag que indica ao final do FOR se a linha está vazia
         char Caractere = 0;
         char CaractereAnterior;
-        
+
         // UpperCase all characters
         transform(line.begin(), line.end(),line.begin(), ::toupper);
-        
+
         for (unsigned i=0; i<line.length(); ++i)
         {
             CaractereAnterior = Caractere;
             Caractere = line.at(i);
-            
+
             // Trabalhar apenas com SPACE, eliminar \t
             if (Caractere == '\t')
             {
                 Caractere = ' ';
                 line.at(i) = ' ';
             }
-            
+
             // detectar comentário
             if (Caractere == ';')
             {
@@ -99,24 +99,24 @@ int main(int argc, const char * argv[]) {
                 line = line.substr(0,i);
                 break; // sair do for, fim da linha
             }
-            
+
             // teste de linha vazia
             if (Caractere != ' ' && LinhaVazia)
             {
-                
+
                 line = line.substr(i,line.length()-i); // cortar linha, tirar espaços no inicio
                 i = 0; // string foi modificada
-                
+
                 LinhaVazia = false;
             }
-            
+
             // unificar espaços internos da linha
             if (!LinhaVazia && CaractereAnterior == ' ' && Caractere == ' ')
             {
                 line.erase (line.begin()+i); // apagar espaço duplo
                 i--;
             }
-            
+
             // retirar SPACE antes de ':' e ','
             if (!LinhaVazia && CaractereAnterior == ' ' && (Caractere == ':' || Caractere == ','))
             {
@@ -124,7 +124,7 @@ int main(int argc, const char * argv[]) {
                 line.at(i-1) = Caractere;
                 i--;
             }
-            
+
             // garantir que tem SPACE depois de ':' e ','
             if (!LinhaVazia && (CaractereAnterior == ':' || CaractereAnterior == ',') && Caractere != ' ')
             {
@@ -132,14 +132,14 @@ int main(int argc, const char * argv[]) {
                 line.at(i-1) = CaractereAnterior;
                 i++;
             }
-            
+
         }
-        
+
         // apagar espaço no final da linha
         if (!LinhaVazia)
             if (line.at(line.length()-1) == ' ')
                 line.erase (line.begin()+line.length()-1);
-        
+
         // Procurar EQU na linha -----------------------------------------------------------------------
         size_t foundEQU = line.find("EQU");//foundEQU = unsigned int com a posição
         EquateStruct *aux;
@@ -150,27 +150,27 @@ int main(int argc, const char * argv[]) {
             aux = new EquateStruct;
             aux->valor = line.substr(foundEQU+4, line.length()-1);
             aux->nome = line.substr(0,foundEQU-2);
-            
+
             // procurar por declaração repetida
             ProcurarLista(InicioListaEqu, aux->nome);
             if(retorno != ""){
                 cout << "ERRO semântico:(linha " << ContadorLinhas << ") " << " declaração de EQU repetida.\n";
             }
-            
+
             if (InicioListaEqu->nome == "")
                 InicioListaEqu = aux;
             else
                 FimListaEqu->next = aux;
             FimListaEqu = aux;
         }
-        
+
         // Procurar simbolos definidos com EQU ---------------------------------------------------------
         int PrimeiroChar = 0;
         string palavra;
         for (unsigned i=0; i<line.length(); ++i)
         {
             Caractere = line.at(i);
-            
+
             if(Caractere == ' '){
                 palavra = line.substr(PrimeiroChar, i-PrimeiroChar);
                 ProcurarLista(InicioListaEqu, palavra);
@@ -180,7 +180,7 @@ int main(int argc, const char * argv[]) {
                         line = line.substr(0, PrimeiroChar) + retorno + line.substr(i, line.length()-i);
                     else
                         line = retorno + line.substr(i, line.length()-i);
-                    
+
                 }
                 PrimeiroChar = i+1;
             }
@@ -193,11 +193,11 @@ int main(int argc, const char * argv[]) {
                         line = line.substr(0, PrimeiroChar) + retorno;
                     else
                         line = retorno;
-                    
+
                 }
             }
         }
-        
+
         // Procurar IF na linha ------------------------------------------------------------------------
         if (!LinhaVazia)
         {
@@ -235,23 +235,23 @@ int main(int argc, const char * argv[]) {
                 }
             }
         }
-        
-        
+
+
         // Escrever linha no arquivo de saida
         if (!LinhaVazia && !DescartarLinhaIF && !DescartarLinhaEQU) // linha não vazia
         {
             ArquivoPRE << line << "\n";
             NumeroDasLinhas.push_back(ContadorLinhas);
             //cout << NumeroDasLinhas.back() << "\n";
-            
+
             fileBin.write ((char *)&ContadorLinhas, sizeof(ContadorLinhas));
         }
     }
-    
-    
+
+
     ArquivoPRE.close();
     ArquivoASM.close();
     fileBin.close();
-    
+
     return 0;
 }
